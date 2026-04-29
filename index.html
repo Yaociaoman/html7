@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Form Validation</title>
+<style>
+  body {
+    font-family: serif;
+    padding: 40px;
+  }
+
+  p { font-size: 1.2rem; margin-bottom: 16px; }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  input[type="text"] {
+    font-size: 1rem;
+    padding: 6px 10px;
+    border: 1px solid #999;
+    width: 300px;
+  }
+
+  button {
+    font-size: 1rem;
+    padding: 6px 18px;
+    background: #f0f0f0;
+    border: 1px solid #bbb;
+    cursor: pointer;
+  }
+
+  #msg {
+    font-size: 1rem;
+    min-height: 1.4em;
+  }
+</style>
+</head>
+<body>
+
+<p>Please input a number between 150 and 300:</p>
+
+<div class="row">
+  <input type="text" id="numInput" placeholder="Enter a number">
+  <button onclick="validate()">Submit</button>
+</div>
+
+<div id="msg"></div>
+
+<script>
+  function validate() {
+    const val = parseFloat(document.getElementById('numInput').value);
+    const msg = document.getElementById('msg');
+
+    if (isNaN(val)) {
+      msg.textContent = 'Please enter a valid number.';
+      return;
+    }
+
+    if (val >= 150 && val <= 300) {
+      msg.textContent = 'Input OK';
+    } else if (val > 300) {
+      msg.textContent = 'Value too large';
+    } else {
+      msg.textContent = 'Value too small';
+    }
+  }
+
+  document.getElementById('numInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') validate();
+  });
+</script>
+
+</body>
+</html>
