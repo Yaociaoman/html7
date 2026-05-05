@@ -1,78 +1,469 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Form Validation</title>
-<style>
-  body {
-    font-family: serif;
-    padding: 40px;
-  }
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <title>Taiwan Cultural Trail</title>
+        <style>
+            :root {
+                --brick-red:   #8e0302;
+                --brick-light: #b03b2a;
+                --paper-white: #f5f0e8;
+                --beige:       #d6b19b;
+                --whale-blue:  #024b57;
+                --deep-orange: #c05a04;
+                --seafoam:     #477273;
+                --amber:       #a56249;
+                --ink:         #1e1a16;
+                --stamp-gold:  #c9943a;
+            }
 
-  p { font-size: 1.2rem; margin-bottom: 16px; }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
+            body {
+                font-family: "Times New Roman", serif;
+                background-color: var(--paper-white);
+                overflow: hidden;
+            }
 
-  input[type="text"] {
-    font-size: 1rem;
-    padding: 6px 10px;
-    border: 1px solid #999;
-    width: 300px;
-  }
+            /* ───────────────────────────────
+               登入/註冊 遮罩
+            ─────────────────────────────── */
+            #auth-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(2, 30, 22, 0.82);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            }
 
-  button {
-    font-size: 1rem;
-    padding: 6px 18px;
-    background: #f0f0f0;
-    border: 1px solid #bbb;
-    cursor: pointer;
-  }
+            #auth-box {
+                background: var(--paper-white);
+                border-radius: 14px;
+                overflow: hidden;
+                width: 460px;
+                max-width: 95vw;
+                box-shadow: 0 12px 48px rgba(0,0,0,0.35);
+            }
 
-  #msg {
-    font-size: 1rem;
-    min-height: 1.4em;
-  }
-</style>
-</head>
-<body>
+            #auth-header {
+                background: var(--brick-red);
+                color: var(--paper-white);
+                padding: 1.4rem 2rem;
+                text-align: center;
+            }
 
-<p>Please input a number between 150 and 300:</p>
+            #auth-header h2 {
+                font-size: 1.6rem;
+                letter-spacing: 0.04em;
+            }
 
-<div class="row">
-  <input type="text" id="numInput" placeholder="Enter a number">
-  <button onclick="validate()">Submit</button>
-</div>
+            #auth-header p {
+                font-size: 0.85rem;
+                opacity: 0.8;
+                margin-top: 0.3rem;
+            }
 
-<div id="msg"></div>
+            /* tabs */
+            .auth-tabs {
+                display: flex;
+                border-bottom: 2px solid var(--beige);
+            }
 
-<script>
-  function validate() {
-    const val = parseFloat(document.getElementById('numInput').value);
-    const msg = document.getElementById('msg');
+            .auth-tab {
+                flex: 1;
+                padding: 0.7rem;
+                font-family: "Times New Roman", serif;
+                font-size: 1rem;
+                border: none;
+                background: #ede8df;
+                color: var(--amber);
+                cursor: pointer;
+                transition: background 0.2s;
+            }
 
-    if (isNaN(val)) {
-      msg.textContent = 'Please enter a valid number.';
-      return;
-    }
+            .auth-tab.active {
+                background: var(--paper-white);
+                color: var(--brick-red);
+                font-weight: bold;
+                border-bottom: 2px solid var(--brick-red);
+                margin-bottom: -2px;
+            }
 
-    if (val >= 150 && val <= 300) {
-      msg.textContent = 'Input OK';
-    } else if (val > 300) {
-      msg.textContent = 'Value too large';
-    } else {
-      msg.textContent = 'Value too small';
-    }
-  }
+            /* form body */
+            .auth-form {
+                padding: 1.8rem 2rem;
+            }
 
-  document.getElementById('numInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') validate();
-  });
-</script>
+            .auth-form.hidden { display: none; }
 
-</body>
+            .form-group { margin-bottom: 1.1rem; }
+
+            .form-row { display: flex; gap: 12px; }
+            .form-row .form-group { flex: 1; }
+
+            .auth-form label {
+                display: block;
+                font-size: 0.75rem;
+                color: var(--seafoam);
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                margin-bottom: 0.35rem;
+            }
+
+            .auth-form input[type="text"],
+            .auth-form input[type="email"],
+            .auth-form input[type="password"] {
+                width: 100%;
+                padding: 0.6rem 0.85rem;
+                border: 1px solid var(--beige);
+                border-radius: 7px;
+                font-family: "Times New Roman", serif;
+                font-size: 0.95rem;
+                background: #fffcf7;
+                color: var(--ink);
+                outline: none;
+                transition: border-color 0.2s, box-shadow 0.2s;
+            }
+
+            .auth-form input:focus {
+                border-color: var(--whale-blue);
+                box-shadow: 0 0 0 3px rgba(2,75,87,0.15);
+            }
+
+            /* 密碼強度 */
+            .strength-bars { display: flex; gap: 4px; margin-top: 5px; }
+            .s-bar { height: 3px; flex: 1; border-radius: 2px; background: var(--beige); transition: background 0.3s; }
+            .pw-hint { font-size: 0.72rem; color: var(--amber); margin-top: 3px; font-family: sans-serif; }
+
+            /* 忘記密碼 */
+            .label-row { display: flex; justify-content: space-between; align-items: center; }
+            .forgot { font-size: 0.75rem; color: var(--seafoam); cursor: pointer; }
+            .forgot:hover { text-decoration: underline; }
+
+            /* 主按鈕 */
+            .btn-auth {
+                width: 100%;
+                padding: 0.75rem;
+                background: var(--brick-red);
+                color: var(--paper-white);
+                border: none;
+                border-radius: 8px;
+                font-family: "Times New Roman", serif;
+                font-size: 1rem;
+                cursor: pointer;
+                margin-top: 0.5rem;
+                letter-spacing: 0.05em;
+                transition: background 0.2s, transform 0.1s;
+            }
+
+            .btn-auth:hover { background: var(--brick-light); }
+            .btn-auth:active { transform: scale(0.99); }
+
+            /* 錯誤訊息 */
+            .auth-error {
+                font-size: 0.8rem;
+                color: var(--brick-red);
+                background: #fdecea;
+                border: 1px solid #f5b8b8;
+                border-radius: 6px;
+                padding: 0.5rem 0.75rem;
+                margin-top: 0.8rem;
+                display: none;
+                font-family: sans-serif;
+            }
+
+            /* 切換連結 */
+            .auth-switch {
+                font-size: 0.82rem;
+                color: var(--amber);
+                text-align: center;
+                margin-top: 1rem;
+                font-family: sans-serif;
+            }
+
+            .auth-switch a { color: var(--whale-blue); cursor: pointer; }
+            .auth-switch a:hover { text-decoration: underline; }
+
+            /* ───────────────────────────────
+               主頁面（登入後顯示）
+            ─────────────────────────────── */
+            #main-app { display: none; }
+
+            header {
+                background-color: var(--brick-red);
+                color: var(--paper-white);
+                padding: 1rem;
+                text-align: center;
+                position: relative;
+            }
+
+            h1 { font-size: 50px; }
+            p  { font-size: 18px; }
+
+            /* 右上角使用者資訊 */
+            #user-info {
+                position: absolute;
+                top: 50%;
+                right: 1.2rem;
+                transform: translateY(-50%);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 0.85rem;
+                color: var(--paper-white);
+                font-family: sans-serif;
+            }
+
+            #user-info span { opacity: 0.9; }
+
+            #btn-logout {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.5);
+                color: var(--paper-white);
+                padding: 4px 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 0.8rem;
+                font-family: sans-serif;
+                transition: background 0.2s;
+            }
+
+            #btn-logout:hover { background: rgba(255,255,255,0.15); }
+
+            .tab-btn {
+                font-family: "Times New Roman", serif;
+                font-size: 20px;
+                background-color: var(--seafoam);
+                color: var(--paper-white);
+                width: 200px;
+                height: 40px;
+                border: none;
+                cursor: pointer;
+            }
+
+            .container { 
+                display: flex;
+                height: calc(100vh - 110px);
+            }
+
+            #map{
+                flex: 1;
+            }
+
+            #sidebar {
+                background: var(--whale-blue);
+                padding: 20px;
+                width: 250px;
+                color: var(--paper-white);
+                min-height: calc(100vh - 120px);
+            }
+        </style>
+    </head>
+    <body>
+
+        <!-- ══════════════════════════════
+             登入 / 註冊 彈窗
+        ══════════════════════════════ -->
+        <div id="auth-overlay">
+            <div id="auth-box">
+                <div id="auth-header">
+                    <h2>Taiwan Cultural Trails</h2>
+                    <p>登入以開始探索台灣各地創生文化</p>
+                </div>
+
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">登入</button>
+                    <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">註冊</button>
+                </div>
+
+                <!-- 登入表單 -->
+                <div class="auth-form" id="form-login">
+                    <div class="form-group">
+                        <label>電子郵件</label>
+                        <input type="email" id="login-email" placeholder="you@example.com" />
+                    </div>
+                    <div class="form-group">
+                        <div class="label-row">
+                            <label>密碼</label>
+                            <span class="forgot" onclick="alert('重設連結已寄出！')">忘記密碼？</span>
+                        </div>
+                        <input type="password" id="login-password" placeholder="••••••••" />
+                    </div>
+                    <button class="btn-auth" onclick="handleLogin()">登入</button>
+                    <div class="auth-error" id="login-error"></div>
+                    <p class="auth-switch">還沒有帳號？<a onclick="switchAuthTab('register')">立即註冊</a></p>
+                </div>
+
+                <!-- 註冊表單 -->
+                <div class="auth-form hidden" id="form-register">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>使用者名稱</label>
+                            <input type="text" id="reg-username" placeholder="user123" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>電子郵件</label>
+                        <input type="email" id="reg-email" placeholder="you@example.com" />
+                    </div>
+                    <div class="form-group">
+                        <label>密碼</label>
+                        <input type="password" id="reg-password" placeholder="至少 8 個字元"
+                               oninput="checkStrength(this.value)" />
+                        <div class="strength-bars">
+                            <div class="s-bar" id="s1"></div>
+                            <div class="s-bar" id="s2"></div>
+                            <div class="s-bar" id="s3"></div>
+                            <div class="s-bar" id="s4"></div>
+                        </div>
+                        <div class="pw-hint" id="pw-hint">請輸入密碼</div>
+                    </div>
+                    <button class="btn-auth" onclick="handleRegister()">建立帳號</button>
+                    <div class="auth-error" id="register-error"></div>
+                    <p class="auth-switch">已有帳號？<a onclick="switchAuthTab('login')">立即登入</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════
+             主頁面（登入後顯示）
+        ══════════════════════════════ -->
+        <div id="main-app">
+            <header>
+                <h1>Taiwan Cultural Trails</h1>
+                <p>Feel free to explore the historical sites and local artists in Taiwan!</p>
+                <div id="user-info">
+                    <span id="user-name-display"></span>
+                    <button id="btn-logout" onclick="handleLogout()">登出</button>
+                </div>
+            </header>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('explore', this)">Explore Map</button>
+            </div>
+
+            <div class="container">
+                <div id="sidebar">
+                    <h2>Tools</h2>
+                    <!-- 你原本的側邊欄內容放這裡 -->
+                </div>
+                <div id="map">
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // ── 切換登入/註冊 tab ──
+            function switchAuthTab(tab) {
+                const isLogin = tab === 'login';
+                document.getElementById('tab-login').classList.toggle('active', isLogin);
+                document.getElementById('tab-register').classList.toggle('active', !isLogin);
+                document.getElementById('form-login').classList.toggle('hidden', !isLogin);
+                document.getElementById('form-register').classList.toggle('hidden', isLogin);
+            }
+
+            // ── 密碼強度 ──
+            function checkStrength(value) {
+                let score = 0;
+                if (value.length >= 8)          score++;
+                if (/[A-Z]/.test(value))        score++;
+                if (/[0-9]/.test(value))        score++;
+                if (/[^A-Za-z0-9]/.test(value)) score++;
+
+                const colors = ['#c05a04', '#c9943a', '#477273', '#024b57'];
+                const labels = ['太弱', '還可以', '不錯', '非常強'];
+
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById('s' + i).style.background =
+                        i <= score ? colors[score - 1] : '#d6b19b';
+                }
+                document.getElementById('pw-hint').textContent =
+                    value.length ? (labels[score - 1] || '太弱') : '請輸入密碼';
+            }
+
+            // ── 顯示錯誤 ──
+            function showError(id, msg) {
+                const el = document.getElementById(id);
+                el.textContent = msg;
+                el.style.display = 'block';
+            }
+
+            // ── 登入成功後進入主頁 ──
+            let mapInitialized = false;
+
+            function enterApp(name) {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                document.getElementById('user-name-display').textContent = '👤 ' + name;
+
+                if (!mapInitialized) {
+                const map = L.map('map').setView([23.8, 121], 7);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                mapInitialized = true;
+                }
+            }
+
+            // ── 登入 ──
+            function handleLogin() {
+                const email    = document.getElementById('login-email').value.trim();
+                const password = document.getElementById('login-password').value;
+
+                if (!email || !password) {
+                    showError('login-error', '請填寫電子郵件與密碼！');
+                    return;
+                }
+
+                // TODO: 替換成真實 API
+                // const res = await fetch('/api/login', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ email, password })
+                // });
+
+                // 示範：直接通過
+                enterApp(email.split('@')[0]);
+            }
+
+            // ── 註冊 ──
+            function handleRegister() {
+                const name     = document.getElementById('reg-name').value.trim();
+                const username = document.getElementById('reg-username').value.trim();
+                const email    = document.getElementById('reg-email').value.trim();
+                const password = document.getElementById('reg-password').value;
+
+                if (!name || !username || !email || !password) {
+                    showError('register-error', '請填寫所有欄位！');
+                    return;
+                }
+                if (password.length < 8) {
+                    showError('register-error', '密碼至少需要 8 個字元！');
+                    return;
+                }
+
+                // TODO: 替換成真實 API
+                // const res = await fetch('/api/register', { ... });
+
+                enterApp(name);
+            }
+
+            // ── 登出 ──
+            function handleLogout() {
+                document.getElementById('main-app').style.display = 'none';
+                document.getElementById('auth-overlay').style.display = 'flex';
+                document.getElementById('login-email').value = '';
+                document.getElementById('login-password').style.value = '';
+            }
+
+            // ── 原本的 tab 切換 ──
+            function switchTab(name, btn) {
+                // 你原本的頁籤邏輯
+            }
+        </script>
+    </body>
 </html>
