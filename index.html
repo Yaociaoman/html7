@@ -54,190 +54,8 @@
                 transition: background-color 0.5s, color 0.5s;
             }
             /* start page (login) */
-
-            /* header */
-            header{
-                background-color: var(--header-bg);
-                color: var(--paper-white);
-                padding: 0.6rem 1rem 0.6rem 1.2rem;
-                
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                flex-shrink: 0;/*when window shrink, element doesn't shrink*/
-
-                border-bottom:3px solid var(--stamp-gold);
-                transition: background-color 0.5s;
-            }
-
-            
-            /* tool bar */
-            /* map page */
-            /* map */
-            /* sidebar */
-            /* 收合button */
-            /* search */
-            /* filter */
-            /* locatoin shown */
-            /* info panel */
-            /* stamp page */
-            /*photo storage*/
-        </style>
-    </head>
-    <body>
-        
-        <!-- Start Page -->
-            <!-- Login -->
-            
-        <!-- Header -->
-        <header>
-            <div class="header-left">
-                <h1>Taiwan Cultural Trails</h1>
-                <div class="header-sub">Explore historical sites &amp; local artisans across Taiwan</div>
-            </div>
-            <div class="header-right">
-                <span class="header-user" id="header-user"></span>
-                <label class="theme-toggle" id="themeToggle" title="Day/Night">
-                    ☀︎
-                    <div class="toggle-track">
-                        <div class="toggle-thumb"></div>
-                        ☾
-                    </div>
-                </label>
-            </div>
-        </header>
-
-        <!-- Tool Bar -->
-        <div class="tool-bar">
-            <button class="tool-btn active" onclick="switchTab('map',this)">Explore Map</button>
-            <button class="tool-btn"        onclick="switchTab('stamps',this)">Stamp Collection</button>
-            <button class="tool-btn"        onclick="switchTab('memory')">Memory Photos</button>
-        </div>
-
-            <!-- Map page -->
-            <div class="map-layout" id="mapLayout">
-
-                <!-- Map -->
-                 <div class="map-container">
-                    <div id="map"></div>
-                    <div id="api-status"></div>
-                 </div>
-
-                <!-- Sidebar -->
-                <div id="sidebar" class="collapsed">
-
-                    <!-- 收合button -->
-                     <button id="sidebr-button" onclick="toggleSidebar()" title="Toggle sidebar">x</button>
-                    
-                    <!-- Search -->
-                    <div class="sidebar-section">
-                        <h3>⌕ Search</h3>
-                        <!--透明框框搜尋欄（可以輸入的）-->
-                        <div class="search-wrap">
-                            <span class="search-icon">⌕</span>
-                            <input type="text" id="searchInput" placeholder="Search location, brand...">
-                        </div>
-                    </div>
-
-                    <!-- Filter -->
-                    <div class="sidebar-section">
-                        <h3>Filter by Category</h3>
-                        <div class="filter" id="Filter">
-
-                            <label class="filter-item">
-                                <input type="checkbox" value="Historical Sites" checked onchange="applyFilter()">
-                                <div class="filter-box"></div>
-                                Historical Building
-                                <span class="filter-status" style="background:#c05a04"></span>
-                            </label>
-
-                            <label class="filter-item">
-                                <input type="checkbox" value="Cretive Markets" onchange="applyFilter()">
-                                <div class="filter-box"></div>
-                                Creative Market
-                                <span class="filter-status" style="background:#c05a04"></span>
-                            </label>
-
-                            <label class="filter-item">
-                                <input type="checkbox" value="Craft Shops" onchange="applyFilter()">
-                                <div class="filter-box"></div>
-                                Local Craft Shop
-                                <span class="filter-status" style="background:#c05a04"></span>
-                            </label>
-
-                            <label class="filter-item">
-                                <input type="checkbox" value="Cultural Center" onchange="applyFilter()">
-                                <div class="filter-box"></div>
-                                Cultural Center
-                                <span class="filter-status" style="background:#c05a04"></span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <!-- Location Shown -->
-                    <div class="sidebar-section" style="padding-bottom:0.4rem; border-bottom:none;">
-                        <h3>Locations</h3>
-                    </div>
-                    <!-- loading -->
-                    <div class="location-list" id="locationList">
-                        <div class="loc-loading">Loading cultural sites...</div>
-                    </div>
-                </div>
-
-                <!-- Info panel-->
-                <div class="info-panel">
-                    <div class="panel-header">
-                        <div class="panel-tag" id="panelTag">Category</div>
-                        <h2 id="panelTitle">Location Name</h2>
-                        <button class="panel-close" onclick="closePanel()">x</button>
-                    </div>
-                    <div class="panel-body">
-                        <p id="panelDesc">Description...</p>
-                        <div class="panel-addr" id="panelAddr"></div>
-                    </div>
-                    <div class="panel-links" id="panelLinks"></div>
-                </div>
-
-            </div>
-
-            <!-- Stamp Page -->
-            <div class="stamp-page">
-                <div class="page-title">Stamp Album</div>
-                <p class="page-sub">Visit each location in person (within 500 m) to unlock your stamp.</p>
-                <div class="stamp-grid" id="stampGrid"></div>
-            </div>
-
-            <!-- Photo storage -->
-            <div class="photo-page" id="photoPage">
-                <div class="page-title">Memory Photo</div>
-                <p class="page-sub">Upload photos from your cultural journey. GPS is verified automatically.</p>
-                
-                <!--
-                    upload-zone -> file input
-                    accept="image" (only image)
-                -->
-                <div class="upload-zone" onclick="document.getElementById('filterInput').click()">
-                    <div class="upload-icon">📤</div>
-                    <p>Click to upload your memory photo<br><small>GPS location will be read from EXIF data</small></p>
-                    <div class="geo-badge">Geolocation Active</div>
-                </div>
-            </div>
-            <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
-            <!-- Uploaded Photo -->
-            <div id="uploaded-toast"></div>
-            
-            <!-- Zoom in photo -->
-            <div class="lightbox" onclick="closeLightbox()">
-                <button id="lightbox-close" onclick="closeLightbox()">x</button>
-                <img id="lightbox-img" src="" alt="">
-                <div id="lightbox-info"></div>
-            </div>
-        <script>
-            //open first panel by default
-            selectLocation(0);
-        </script>
-    </body>
-</html>                background: rgba(2, 30, 22, 0.82);
+             #auth-overlay{
+                background: rgba(2, 30, 22, 0.82);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -465,11 +283,40 @@
                 color: var(--paper-white);
                 min-height: calc(100vh - 120px);
             }
+            /* header */
+            header{
+                background-color: var(--header-bg);
+                color: var(--paper-white);
+                padding: 0.6rem 1rem 0.6rem 1.2rem;
+                
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-shrink: 0;/*when window shrink, element doesn't shrink*/
+
+                border-bottom:3px solid var(--stamp-gold);
+                transition: background-color 0.5s;
+            }
+
+            
+            /* tool bar */
+            /* map page */
+            /* map */
+            /* sidebar */
+            /* 收合button */
+            /* search */
+            /* filter */
+            /* locatoin shown */
+            /* info panel */
+            /* stamp page */
+            /*photo storage*/
         </style>
     </head>
     <body>
-
-        <!-- ══════════════════════════════
+        
+        <!-- Start Page -->
+            <!-- Login -->
+             <!-- ══════════════════════════════
              登入 / 註冊 彈窗
         ══════════════════════════════ -->
         <div id="auth-overlay">
@@ -559,6 +406,158 @@
                 </div>
             </div>
         </div>
+        <!-- Header -->
+        <header>
+            <div class="header-left">
+                <h1>Taiwan Cultural Trails</h1>
+                <div class="header-sub">Explore historical sites &amp; local artisans across Taiwan</div>
+            </div>
+            <div class="header-right">
+                <span class="header-user" id="header-user"></span>
+                <label class="theme-toggle" id="themeToggle" title="Day/Night">
+                    ☀︎
+                    <div class="toggle-track">
+                        <div class="toggle-thumb"></div>
+                        ☾
+                    </div>
+                </label>
+            </div>
+        </header>
+
+        <!-- Tool Bar -->
+        <div class="tool-bar">
+            <button class="tool-btn active" onclick="switchTab('map',this)">Explore Map</button>
+            <button class="tool-btn"        onclick="switchTab('stamps',this)">Stamp Collection</button>
+            <button class="tool-btn"        onclick="switchTab('memory')">Memory Photos</button>
+        </div>
+
+            <!-- Map page -->
+            <div class="map-layout" id="mapLayout">
+
+                <!-- Map -->
+                 <div class="map-container">
+                    <div id="map"></div>
+                    <div id="api-status"></div>
+                 </div>
+
+                <!-- Sidebar -->
+                <div id="sidebar" class="collapsed">
+
+                    <!-- 收合button -->
+                     <button id="sidebr-button" onclick="toggleSidebar()" title="Toggle sidebar">x</button>
+                    
+                    <!-- Search -->
+                    <div class="sidebar-section">
+                        <h3>⌕ Search</h3>
+                        <!--透明框框搜尋欄（可以輸入的）-->
+                        <div class="search-wrap">
+                            <span class="search-icon">⌕</span>
+                            <input type="text" id="searchInput" placeholder="Search location, brand...">
+                        </div>
+                    </div>
+
+                    <!-- Filter -->
+                    <div class="sidebar-section">
+                        <h3>Filter by Category</h3>
+                        <div class="filter" id="Filter">
+
+                            <label class="filter-item">
+                                <input type="checkbox" value="Historical Sites" checked onchange="applyFilter()">
+                                <div class="filter-box"></div>
+                                Historical Building
+                                <span class="filter-status" style="background:#c05a04"></span>
+                            </label>
+
+                            <label class="filter-item">
+                                <input type="checkbox" value="Cretive Markets" onchange="applyFilter()">
+                                <div class="filter-box"></div>
+                                Creative Market
+                                <span class="filter-status" style="background:#c05a04"></span>
+                            </label>
+
+                            <label class="filter-item">
+                                <input type="checkbox" value="Craft Shops" onchange="applyFilter()">
+                                <div class="filter-box"></div>
+                                Local Craft Shop
+                                <span class="filter-status" style="background:#c05a04"></span>
+                            </label>
+
+                            <label class="filter-item">
+                                <input type="checkbox" value="Cultural Center" onchange="applyFilter()">
+                                <div class="filter-box"></div>
+                                Cultural Center
+                                <span class="filter-status" style="background:#c05a04"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Location Shown -->
+                    <div class="sidebar-section" style="padding-bottom:0.4rem; border-bottom:none;">
+                        <h3>Locations</h3>
+                    </div>
+                    <!-- loading -->
+                    <div class="location-list" id="locationList">
+                        <div class="loc-loading">Loading cultural sites...</div>
+                    </div>
+                </div>
+
+                <!-- Info panel-->
+                <div class="info-panel">
+                    <div class="panel-header">
+                        <div class="panel-tag" id="panelTag">Category</div>
+                        <h2 id="panelTitle">Location Name</h2>
+                        <button class="panel-close" onclick="closePanel()">x</button>
+                    </div>
+                    <div class="panel-body">
+                        <p id="panelDesc">Description...</p>
+                        <div class="panel-addr" id="panelAddr"></div>
+                    </div>
+                    <div class="panel-links" id="panelLinks"></div>
+                </div>
+
+            </div>
+
+            <!-- Stamp Page -->
+            <div class="stamp-page">
+                <div class="page-title">Stamp Album</div>
+                <p class="page-sub">Visit each location in person (within 500 m) to unlock your stamp.</p>
+                <div class="stamp-grid" id="stampGrid"></div>
+            </div>
+
+            <!-- Photo storage -->
+            <div class="photo-page" id="photoPage">
+                <div class="page-title">Memory Photo</div>
+                <p class="page-sub">Upload photos from your cultural journey. GPS is verified automatically.</p>
+                
+                <!--
+                    upload-zone -> file input
+                    accept="image" (only image)
+                -->
+                <div class="upload-zone" onclick="document.getElementById('filterInput').click()">
+                    <div class="upload-icon">📤</div>
+                    <p>Click to upload your memory photo<br><small>GPS location will be read from EXIF data</small></p>
+                    <div class="geo-badge">Geolocation Active</div>
+                </div>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
+            <!-- Uploaded Photo -->
+            <div id="uploaded-toast"></div>
+            
+            <!-- Zoom in photo -->
+            <div class="lightbox" onclick="closeLightbox()">
+                <button id="lightbox-close" onclick="closeLightbox()">x</button>
+                <img id="lightbox-img" src="" alt="">
+                <div id="lightbox-info"></div>
+            </div>
+        <script>
+            //open first panel by default
+            selectLocation(0);
+        </script>
+    </body>
+</html>                
+           
+        </style>
+    </head>
 <!--
         <script>
             // ── 切換登入/註冊 tab ──
